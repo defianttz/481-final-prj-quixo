@@ -3,7 +3,7 @@ import time
 start_time = time.time()
 class Quixo(Game):
 
-    def __init__(self, h=4, v=4, k=4):
+    def __init__(self, h=3, v=3, k=3):
         self.h = h
         self.v = v
         self.k = k
@@ -139,7 +139,9 @@ if __name__ == '__main__':
     print(q.initial)
     #print(t.initial)
     #print(t.play_game(minmax_player, random_player))
-    utility = q.play_game(query_player, minmax_player) # computer moves first
+    #utility = q.play_game(query_player, minmax_player) # computer moves first
+    utility = q.play_game() # computer moves first
+
     end_time = time.time()
     print("\nGame over!")
     if utility >0:
