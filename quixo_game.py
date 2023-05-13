@@ -1,9 +1,9 @@
 from games import *
-
-
+import time
+start_time = time.time()
 class Quixo(Game):
 
-    def __init__(self, h=5, v=5, k=5):
+    def __init__(self, h=4, v=4, k=4):
         self.h = h
         self.v = v
         self.k = k
@@ -28,12 +28,15 @@ class Quixo(Game):
         return moves
 
     def result(self, state, move):
-        """Return the state that results from making a move from a state."""
+        if move not in state.moves:
+            return state  # Illegal move has no effect
+        #"""Return the state that results from making a move from a state."""
         player = state.to_move
         board = [row[:] for row in state.board]
-        board[self.h - move[1] - 1][move[0]-1] = player
+        board[move[0]-1][move[1]-1] = player
         moves = state.moves[:]
         moves.remove(move)
+        print(f"Player: {player}  Move: {move} Board: {board}")
         return GameState(to_move=('O' if player == 'X' else 'X'),
                           utility=self.compute_utility(board, player),
                           board=board, moves=moves)
@@ -104,12 +107,45 @@ class Quixo(Game):
             self.display(state)
             if self.terminal_test(state):
                 print("Game over!")
-                return self.compute_utility(state.board, 'X')
-            move = self.minmax_decision(state, self)
+                return self.compute_utility(state.board, state.to_move)
+            if player == 'X':
+                move = query_player(self, state)
+            else:
+                move = self.minmax_decision(state, self)
             state = self.result(state, move)
+
+    def play_game2(self, *players):
+        """Play an n-person, move-alternating game."""
+        state = self.initial
+        while True:
+            for player in players:
+                move = player(self, state)
+                print(f'\nplayer: {state.to_move} move:', move)
+                #print('\nplayer:', self.to_move(state))
+
+                state = self.result(state, move)
+                #print("resulting state: \nboard:  ", state.board)
+                print("available moves:  ", state.moves)
+                if self.terminal_test(state):
+                    print("------------------")
+                    self.display(state)
+
+                    return self.utility(state, self.to_move(self.initial))
 if __name__ == '__main__':
     print("Let's play Quixo!")
     q = Quixo()
+
     #t = TicTacToe()
+    print(q.initial)
+    #print(t.initial)
     #print(t.play_game(minmax_player, random_player))
-    q.play_game(minmax_player, random_player)
+    utility = q.play_game(query_player, minmax_player) # computer moves first
+    end_time = time.time()
+    print("\nGame over!")
+    if utility >0:
+        print("\nPlayer X wins!")
+    else:
+        print("\nPlayer O wins!")
+    runtime = end_time - start_time
+    print("Runtime:", runtime, "seconds")
+    #utility = q.play_game(query_player, minmax_player) # computer moves first
